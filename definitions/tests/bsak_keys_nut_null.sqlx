@@ -1,0 +1,9 @@
+config { type: "assertion" }
+
+-- Ensure a few critical keys exist (adjust to your rules)
+SELECT *
+FROM ${ref("mart", "bsak")}
+WHERE Client IS NULL
+   OR CompCode IS NULL
+   OR AcctDoc IS NULL
+   OR LineNum IS NULL;
