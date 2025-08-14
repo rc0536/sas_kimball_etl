@@ -1,0 +1,6 @@
+-- Declare external (already-existing) tables the Cloud Function loads into.
+-- Add more `declare` blocks here as you create more raw tables.
+declare {
+  schema: "landing",
+  name: "lnd_bsak"
+}

@@ -1,0 +1,116 @@
+config {
+  type: "table",              -- materialize staging as a table (can be "incremental" later)
+  schema: "staging",
+  name: "bsak_staging",
+  tags: ["sap","bsak","staging"]
+}
+
+js {
+  const { safe_date, dec15, safe_int, str, str1 } = require("../includes/macros.js");
+}
+
+-- Use the declared raw table as a source
+WITH src AS (
+  SELECT * FROM ${ref("landing", "lnd_bsak")}
+)
+
+SELECT
+  -- Strings in BQ are just STRING; preserving original names and intent
+  CAST(MANDT AS STRING)                         AS Client,
+  CAST(BUKRS AS STRING)                         AS CompCode,
+  CAST(LIFNR AS STRING)                         AS AcctNumOfVendor,
+  ${str1("UMSKS")}                              AS SpclGLTranType,
+  ${str1("UMSKZ")}                              AS SpclGLInd,
+  ${safe_date("AUGDT")}                         AS ClearingDate,
+  CAST(AUGBL AS STRING)                         AS ClearDoc,
+  CAST(ZUONR AS STRING)                         AS AssignNum,
+  ${safe_int("GJAHR")}                          AS FiscYear,
+  CAST(BELNR AS STRING)                         AS AcctDoc,
+  ${safe_int("BUZEI")}                          AS LineNum,
+  ${safe_date("BUDAT")}                         AS PostDate,
+  ${safe_date("BLDAT")}                         AS DocDate,
+  ${safe_date("CPUDT")}                         AS EntDate,
+  CAST(WAERS AS STRING)                         AS CurrKey,
+  CAST(XBLNR AS STRING)                         AS Invoice,
+  CAST(BLART AS STRING)                         AS DocType,
+  ${safe_int("MONAT")}                          AS FiscPeriod,
+  CAST(BSCHL AS STRING)                         AS PostingKey,
+  CAST(ZUMSK AS STRING)                         AS TargSpclGlInd,
+  CAST(SHKZG AS STRING)                         AS DebitCreditInd,
+  CAST(GSBER AS STRING)                         AS BusinessArea,
+  CAST(MWSKZ AS STRING)                         AS TaxOnSalesPurchCode,
+
+  ${dec15("DMBTR")}                             AS AmtInLocalCurr,
+  ${dec15("WRBTR")}                             AS AmtInDocCurr,
+  ${dec15("MWSTS")}                             AS TaxAmtInLocalCurr,
+  ${dec15("WMWST")}                             AS TaxAmtInDocCurr,
+  ${dec15("BDIFF")}                             AS ValDiff,
+  ${dec15("BDIF2")}                             AS ValDiffForTheScndLocalCurr,
+
+  CAST(SGTXT AS STRING)                         AS ItemText,
+  CAST(PROJN AS STRING)                         AS OldProjectNum,
+  CAST(AUFNR AS STRING)                         AS OrderNum,
+  CAST(ANLN1 AS STRING)                         AS MainAssetNum,
+  CAST(ANLN2 AS STRING)                         AS AssetSubNum,
+  CAST(EBELN AS STRING)                         AS PurchDocNum,
+  ${safe_int("EBELP")}                          AS ItemNumOfPurchDoc,
+  CAST(SAKNR AS STRING)                         AS GLAcctNum,
+  CAST(HKONT AS STRING)                         AS GeneralLedgerAcct,
+  ${safe_int("FKONT")}                          AS FinancialBudgetItem,
+  CAST(FILKD AS STRING)                         AS AcctNumOfTheBranch,
+
+  ${safe_date("ZFBDT")}                         AS BaselineDateForDueDateCalc,
+  CAST(ZTERM AS STRING)                         AS TermsOfPayKey,
+  CAST(ZBD1T AS STRING)                         AS CashDiscDays1,
+  CAST(ZBD2T AS STRING)                         AS CashDiscDays2,
+  CAST(ZBD3T AS STRING)                         AS NetPayTermsPeriod,
+  CAST(ZBD1P AS STRING)                         AS CashDiscPercentage1,
+  CAST(ZBD2P AS STRING)                         AS CashDiscPercentage2,
+
+  ${dec15("SKFBT")}                             AS AmtEligibleForCashDiscInDocCurr,
+  ${dec15("SKNTO")}                             AS CashDiscAmtInLocalCurr,
+  ${dec15("WSKTO")}                             AS CashDiscAmtInDocCurr,
+
+  CAST(ZLSCH AS STRING)                         AS PayMethod,
+  CAST(ZLSPR AS STRING)                         AS PayBlockKey,
+  CAST(ZBFIX AS STRING)                         AS FixedPayTerms,
+  CAST(HBKID AS STRING)                         AS ShortKeyForAHouseBank,
+  CAST(BVTYP AS STRING)                         AS PartnerBankType,
+
+  CAST(REBZG AS STRING)                         AS NumOfTheInvoiceTheTranBelongsTo,
+  ${safe_int("REBZJ")}                          AS FiscYearOfTheRelevantInvoiceForCreditMemo,
+  ${safe_int("REBZZ")}                          AS LineItemInTheRelevantInvoice,
+
+  CAST(ZOLLT AS STRING)                         AS CustomsTariffNum,
+  ${safe_date("ZOLLD")}                         AS CustomsDate,
+  CAST(LZBKZ AS STRING)                         AS StateCentralBankInd,
+  CAST(LANDL AS STRING)                         AS SupplyingCountry,
+  CAST(DIEKZ AS STRING)                         AS ServiceIndForeignPay,
+  CAST(MANSP AS STRING)                         AS DunnBlock,
+  CAST(MSCHL AS STRING)                         AS DunnKey,
+  ${safe_date("MADAT")}                         AS LastDunnedOn,
+  ${safe_int("MANST")}                          AS DunnLevel,
+  CAST(MABER AS STRING)                         AS DunnArea,
+  CAST(XNETB AS STRING)                         AS IndDocPostedNet,
+  CAST(XANET AS STRING)                         AS IndDownPayInNetProcedure,
+  CAST(XCPDD AS STRING)                         AS IndAddressAndBankDataSetIndividually,
+  CAST(XESRD AS STRING)                         AS IndIsAnyIsrDataSetInTheDoc,
+  CAST(XZAHL AS STRING)                         AS IndIsThePostingKeyUsedInAPayTran,
+
+  -- ...continue this mapping using the same patterns...
+  -- (Tip: paste your column list and apply macros; the pattern above covers dates, ints, and decimals.)
+
+  -- Example for “_SIMP_DT” columns: keep as STRING to match your proc
+  CAST(AUGDT_SIMP_DT AS STRING)                 AS AUGDT_SIMP_DT,
+  CAST(BLDAT_SIMP_DT AS STRING)                 AS BLDAT_SIMP_DT,
+  CAST(BUDAT_SIMP_DT AS STRING)                 AS BUDAT_SIMP_DT,
+  CAST(CPUDT_SIMP_DT AS STRING)                 AS CPUDT_SIMP_DT,
+  CAST(DABRZ_SIMP_DT AS STRING)                 AS DABRZ_SIMP_DT,
+  CAST(MADAT_SIMP_DT AS STRING)                 AS MADAT_SIMP_DT,
+  CAST(UEBGDAT_SIMP_DT AS STRING)               AS UEBGDAT_SIMP_DT,
+  CAST(ZFBDT_SIMP_DT AS STRING)                 AS ZFBDT_SIMP_DT,
+  CAST(ZOLLD_SIMP_DT AS STRING)                 AS ZOLLD_SIMP_DT,
+
+  CAST(SOURCE_FILE_NAME AS STRING)              AS SOURCE_FILE_NAME,
+  CAST(SAS_IMPORT_DATETIME AS DATETIME)         AS SAS_IMPORT_DATETIME
+FROM src
