@@ -1,8 +1,10 @@
 config {
+  
   type: "table",
   schema: "mart",
   name: "bsak",
   tags: ["sap","bsak","mart"]
 }
 
-SELECT * FROM ${ref("staging_bsak")};
+SELECT *
+FROM ${ref("bsak_staging")}

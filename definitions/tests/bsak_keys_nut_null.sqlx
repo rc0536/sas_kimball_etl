@@ -6,4 +6,4 @@ FROM ${ref("mart", "bsak")}
 WHERE Client IS NULL
    OR CompCode IS NULL
    OR AcctDoc IS NULL
-   OR LineNum IS NULL;
+   OR LineNum IS NULL

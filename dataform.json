@@ -1,8 +1,10 @@
+
+
 {
-  "repositoryConfig": {
-    "defaultDatabase": "sas-kimbal-phase-0",
-    "defaultSchema": "staging",
-    "defaultLocation": "US"
-  },
-  "warehouse": "bigquery"
+  "warehouse": "bigquery",
+  "defaultDatabase": "sas-kimbal-phase-0",
+  "defaultSchema": "staging",
+  "defaultLocation": "US",
+  "assertionSchema": "dataform_assertions"
 }
+

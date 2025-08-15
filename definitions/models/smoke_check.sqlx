@@ -1,0 +1,11 @@
+config {
+    type: "table",
+    database: "sas-kimbal-phase-0",
+    schema: "staging",
+    name: "smoke_check"
+}
+
+  -- definitions/models/smoke_check.sqlx
+  -- definitions/models/smoke_check.sqlx
+SELECT
+  1 AS ok
