@@ -1,0 +1,28 @@
+config {
+  type: "table",
+  schema: "staging",
+  name: "bvor_staging",
+  tags: ["sap","bvor","staging"]
+}
+
+js {
+  const {
+    safe_sas_datetime,
+    safe_int,
+    str
+  } = require("../includes/macros.js");
+}
+
+WITH src AS (
+  SELECT * FROM `sas-kimbal-phase-0.landing.lnd_bvor`
+)
+SELECT
+  CAST(BVORG AS STRING)  AS NumOfCrossCompCodePostingTran,
+  CAST(BUKRS AS STRING)  AS CompCode,
+  ${safe_int("GJAHR")}   AS FiscYear,
+  CAST(BELNR AS STRING)  AS AcctDoc,
+  CAST(XARCH AS STRING)  AS IndDocAlreadyArchived,
+
+  CAST(SOURCE_FILE_NAME AS STRING)                    AS SOURCE_FILE_NAME,
+  ${safe_sas_datetime("SAS_IMPORT_DATETIME")}         AS SAS_IMPORT_DATETIME
+FROM src

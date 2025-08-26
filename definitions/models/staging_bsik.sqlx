@@ -1,0 +1,280 @@
+config {
+  type: "table",
+  schema: "staging",
+  name: "bsik_staging",
+  tags: ["sap","bsik","staging"]
+}
+
+js {
+  const {
+    safe_date,
+    safe_sas_datetime,
+    dec15,
+    safe_int,
+    str,
+    str1
+  } = require("../includes/macros.js");
+}
+
+-- Mirror of your BSAK pattern: CTE over the landing table, then select with conversions
+WITH src AS (
+  SELECT * FROM `sas-kimbal-phase-0.landing.lnd_bsik`
+)
+SELECT
+  -- Strings / IDs
+  CAST(MANDT AS STRING) AS Client,
+  CAST(BUKRS AS STRING) AS CompCode,
+  CAST(LIFNR AS STRING) AS AcctNumOfVendor,
+  ${str1("UMSKS")} AS SpclGLTranType,
+  ${str1("UMSKZ")} AS SpclGLInd,
+
+  -- Dates
+  ${safe_date("AUGDT")} AS ClearingDate,
+  CAST(AUGBL AS STRING) AS ClearDoc,
+  CAST(ZUONR AS STRING) AS AssignNum,
+  ${safe_int("GJAHR")}  AS FiscYear,
+  CAST(BELNR AS STRING) AS AcctDoc,
+  ${safe_int("BUZEI")}  AS LineNum,
+  ${safe_date("BUDAT")} AS PostDate,
+  ${safe_date("BLDAT")} AS DocDate,
+  ${safe_date("CPUDT")} AS EntDate,
+
+  CAST(WAERS AS STRING) AS CurrKey,
+  CAST(XBLNR AS STRING) AS Invoice,
+  CAST(BLART AS STRING) AS DocType,
+  ${safe_int("MONAT")}  AS FiscPeriod,
+  CAST(BSCHL AS STRING) AS PostingKey,
+  CAST(ZUMSK AS STRING) AS TargSpclGlInd,
+  CAST(SHKZG AS STRING) AS DebitCreditInd,
+  CAST(GSBER AS STRING) AS BusinessArea,
+  CAST(MWSKZ AS STRING) AS TaxOnSalesPurchCode,
+
+  -- Amounts (trim to 15, strip commas)
+  ${dec15("DMBTR")} AS AmtInLocalCurr,
+  ${dec15("WRBTR")} AS AmtInDocCurr,
+  ${dec15("MWSTS")} AS TaxAmtInLocalCurr,
+  ${dec15("WMWST")} AS TaxAmtInDocCurr,
+  ${dec15("BDIFF")} AS ValDiff,
+  ${dec15("BDIF2")} AS ValDiffForTheScndLocalCurr,
+
+  CAST(SGTXT AS STRING) AS ItemText,
+  CAST(PROJN AS STRING) AS OldProjectNum,
+  CAST(AUFNR AS STRING) AS OrderNum,
+  CAST(ANLN1 AS STRING) AS MainAssetNum,
+  CAST(ANLN2 AS STRING) AS AssetSubNum,
+  CAST(EBELN AS STRING) AS PurchDocNum,
+  ${safe_int("EBELP")}  AS ItemNumOfPurchDoc,
+
+  CAST(SAKNR AS STRING) AS GLAcctNum,
+  CAST(HKONT AS STRING) AS GeneralLedgerAcct,
+  ${safe_int("FKONT")}  AS FinancialBudgetItem,
+  CAST(FILKD AS STRING) AS AcctNumOfTheBranch,
+
+  ${safe_date("ZFBDT")} AS BaselineDateForDueDateCalc,
+  CAST(ZTERM AS STRING) AS TermsOfPayKey,
+
+  CAST(ZBD1T AS STRING) AS CashDiscDays1,
+  CAST(ZBD2T AS STRING) AS CashDiscDays2,
+  CAST(ZBD3T AS STRING) AS NetPayTermsPeriod,
+  CAST(ZBD1P AS STRING) AS CashDiscPercentage1,
+  CAST(ZBD2P AS STRING) AS CashDiscPercentage2,
+
+  ${dec15("SKFBT")} AS AmtEligibleForCashDiscInDocCurr,
+  ${dec15("SKNTO")} AS CashDiscAmtInLocalCurr,
+  ${dec15("WSKTO")} AS CashDiscAmtInDocCurr,
+
+  CAST(ZLSCH AS STRING) AS PayMethod,
+  CAST(ZLSPR AS STRING) AS PayBlockKey,
+  CAST(ZBFIX AS STRING) AS FixedPayTerms,
+  CAST(HBKID AS STRING) AS ShortKeyForAHouseBank,
+  CAST(BVTYP AS STRING) AS PartnerBankType,
+
+  CAST(REBZG AS STRING) AS NumOfTheInvoiceTheTranBelongsTo,
+  ${safe_int("REBZJ")}  AS FiscYearOfTheRelevantInvoiceForCreditMemo,
+  ${safe_int("REBZZ")}  AS LineItemInTheRelevantInvoice,
+
+  CAST(ZOLLT AS STRING) AS CustomsTariffNum,
+  ${safe_date("ZOLLD")} AS CustomsDate,
+
+  CAST(LZBKZ AS STRING) AS StateCentralBankInd,
+  CAST(LANDL AS STRING) AS SupplyingCountry,
+  CAST(DIEKZ AS STRING) AS ServiceIndForeignPay,
+  CAST(MANSP AS STRING) AS DunnBlock,
+  CAST(MSCHL AS STRING) AS DunnKey,
+  ${safe_date("MADAT")} AS LastDunnedOn,
+  ${safe_int("MANST")}  AS DunnLevel,
+  CAST(MABER AS STRING) AS DunnArea,
+
+  CAST(XNETB AS STRING) AS IndDocPostedNet,
+  CAST(XANET AS STRING) AS IndDownPayInNetProcedure,
+  CAST(XCPDD AS STRING) AS IndAddressAndBankDataSetIndividually,
+  CAST(XESRD AS STRING) AS IndIsAnyIsrDataSetInTheDoc,
+  CAST(XZAHL AS STRING) AS IndIsThePostingKeyUsedInAPayTran,
+
+  ${str("MWSK1")}   AS TaxCodeForDist_MWSK1,
+  ${dec15("DMBT1")} AS AmtInLocalCurrForTaxDist_DMBT1,
+  ${dec15("WRBT1")} AS AmtInForeignCurrForTaxBreakdown_WRBT1,
+  ${str("MWSK2")}   AS TaxCodeForDist_MWSK2,
+  ${dec15("DMBT2")} AS AmtInLocalCurrForTaxDist_DMBT2,
+  ${dec15("WRBT2")} AS AmtInForeignCurrForTaxBreakdown_WRBT2,
+  ${str("MWSK3")}   AS TaxCodeForDist_MWSK3,
+  ${dec15("DMBT3")} AS AmtInLocalCurrForTaxDist_DMBT3,
+  ${dec15("WRBT3")} AS AmtInForeignCurrForTaxBreakdown_WRBT3,
+
+  ${str("QSSKZ")}   AS WhTaxCode,
+  ${dec15("QSSHB")} AS WhTaxBaseAmt,
+  ${dec15("QBSHB")} AS WhTaxAmtInDocCurr,
+
+  ${str1("BSTAT")}  AS DocStatus,
+
+  ${str("ANFBN")}     AS DocNumOfTheBillOfExchPayRequest,
+  ${safe_int("ANFBJ")} AS FiscYearOfTheBillOfExchPayRequestDoc,
+  ${str("ANFBU")}     AS CompCodeInWhichBillOfExchPayRequestIsPosted,
+
+  ${str("VBUND")}  AS CompanyIdOfTradingPartner,
+  ${str1("REBZT")} AS FollowOnDocType,
+  ${str("STCEG")}  AS VatRegistrationNum,
+
+  ${str("EGBLD")}  AS CountryOfDestinationForDeliveryOfGoods,
+  ${str("EGLLD")}  AS SupplyingCountryForDeliveryOfGoods,
+
+  ${str("QSZNR")}  AS CertificateNumOfTheWhTaxExemption,
+  ${dec15("QSFBT")} AS WhTaxExemptAmtInDocCurr,
+
+  ${str1("XINVE")} AS IndCapitalGoodsAffected,
+
+  ${safe_int("PROJK")} AS WBSElementWbsElement,
+  ${str("FIPOS")}      AS CommitmentItem,
+
+  ${str("NPLNR")}      AS NetworkNumForAcctAssign,
+  ${safe_int("AUFPL")} AS RoutingNumOfOperationsInTheOrder,
+  ${safe_int("APLZL")} AS InternalCounter,
+
+  ${str1("XEGDR")} AS IndTriangularDealWithinTheEu,
+
+  ${dec15("DMBE2")} AS AmtInScndLocalCurr,
+  ${dec15("DMBE3")} AS AmtInThirdLocalCurr,
+
+  ${dec15("DMB21")} AS AmtInScndLocalCurrForTaxBreakdown1,
+  ${dec15("DMB22")} AS AmtInScndLocalCurrForTaxBreakdown2,
+  ${dec15("DMB23")} AS AmtInScndLocalCurrForTaxBreakdown3,
+  ${dec15("DMB31")} AS AmtInThirdLocalCurrForTaxBreakdown1,
+  ${dec15("DMB32")} AS AmtInThirdLocalCurrForTaxBreakdown2,
+  ${dec15("DMB33")} AS AmtInThirdLocalCurrForTaxBreakdown3,
+
+  ${dec15("MWST2")} AS TaxAmtInScndLocalCurr,
+  ${dec15("MWST3")} AS TaxAmtInThirdLocalCurr,
+
+  ${dec15("SKNT2")} AS CashDiscAmtInScndLocalCurr,
+  ${dec15("SKNT3")} AS CashDiscAmtInThirdLocalCurr,
+
+  ${dec15("BDIF3")} AS ValDiffForTheThirdLocalCurr,
+
+  ${str1("XRAGL")} AS IndClearingWasReversed,
+
+  ${str("RSTGR")}  AS ReasonCodeForPays,
+  ${str("UZAWE")}  AS PayMethodSupplement,
+
+  ${str("KOSTL")}     AS CostCenter,
+  ${safe_int("LNRAN")} AS SequenceNumOfAssetLineItemsInFiscYear,
+
+  ${str1("XSTOV")}   AS IndDocIsFlaggedForReversal,
+  ${dec15("KZBTR")}  AS OriginalReductionAmtInLocalCurr,
+
+  ${str("XREF1")} AS BusinessPartnerReferenceKey_XREF1,
+  ${str("XREF2")} AS BusinessPartnerReferenceKey_XREF2,
+
+  ${str1("XARCH")} AS IndDocAlreadyArchived,
+
+  ${str("PSWSL")}   AS UpdateCurrForGeneralLedgerTranFigures,
+  ${dec15("PSWBT")} AS AmtForUpdatingInGeneralLedger,
+
+  ${str("IMKEY")}     AS InternalKeyForRealEstateObject,
+  ${safe_int("ZEKKN")} AS SequentialNumOfAcctAssign,
+
+  ${str("FISTL")} AS FundsCenter,
+  ${str("GEBER")} AS Fund,
+
+  ${safe_date("DABRZ")} AS ReferenceDateForSettlement,
+
+  ${str1("XNEGP")} AS IndNegativePosting,
+  ${str("EMPFB")}  AS PayeePayer,
+  ${str("PRCTR")}  AS ProfitCenter,
+  ${str("XREF3")}  AS ReferenceKeyForLineItem,
+
+  ${safe_int("DTWS1")} AS InstructionKey1,
+  ${safe_int("DTWS2")} AS InstructionKey2,
+  ${safe_int("DTWS3")} AS InstructionKey3,
+  ${safe_int("DTWS4")} AS InstructionKey4,
+
+  ${str1("XPYPR")}  AS IndItemsFromPayProgramBlocked,
+  ${str("KIDNO")}   AS PayReference,
+
+  ${str("PYCUR")}   AS CurrForAutomaticPay,
+  ${dec15("PYAMT")} AS AmtInPayCurr,
+
+  ${str("BUPLA")} AS BusinessPlace,
+  ${str("SECCO")} AS SectionCode,
+
+  ${dec15("PPDIFF")} AS RealizedExchRateGainLoss1LocCurrPartPays,
+  ${dec15("PPDIF2")} AS RealizedExchRateGainLoss2LocCurrPartPays,
+  ${dec15("PPDIF3")} AS RealizedExchRateGainLoss3LocCurrPartPays,
+
+  ${dec15("PENLC1")} AS PenaltyChargeAmtInFirstLocalCurr,
+  ${dec15("PENLC2")} AS PenaltyChargeAmtInScndLocalCurr,
+  ${dec15("PENLC3")} AS PenaltyChargeAmtInThirdLocalCurr,
+  ${dec15("PENFC")}  AS PenaltyChargeAmtInDocCurr,
+
+  ${str("PENDAYS")} AS NumOfDaysForPenaltyChargeCalc,
+  ${str("PENRC")}   AS ReasonForLatePay,
+
+  ${str1("VERTT")} AS ContractType,
+  ${str("VERTN")}  AS ContractNum,
+  ${str("VBEWA")}  AS FlowType,
+
+  ${str("KBLNR")}     AS DocNumForEarmarkedFunds,
+  ${safe_int("KBLPOS")} AS EarmarkedFundsDocItem,
+
+  ${str("GRANT_NBR")} AS Grant,
+  ${str1("GMVKZ")}    AS ItemIsInExecution,
+
+  ${str("SRTYPE")} AS TypeOfAdditionalReceivable,
+  ${str("LOTKZ")}  AS LotNumForRequests,
+  ${str("ZINKZ")}  AS ExemptedFromInterestCalc,
+
+  ${str("FKBER")}   AS FunctionalArea,
+  ${str("INTRENO")} AS InternalRealEstateMasterDataCode,
+  ${str("PPRCT")}   AS PartnerProfitCenter,
+  ${str1("BUZID")}  AS IdentificationOfTheLineItem,
+
+  ${safe_int("AUGGJ")} AS FiscYearOfClearingDoc,
+  ${str("HKTID")}      AS IdForAcctDetails,
+  ${str("KONTT")}      AS AcctAssignCategoryForIndustrySolution,
+  ${str("KONTL")}      AS AcctAssignStringForIndustrySpecificAcctAssignmnts,
+
+  ${safe_date("UEBGDAT")} AS TransferDateOfAnItemToLegalDunnProceeding,
+
+  ${str("VNAME")}  AS JointVenture,
+  ${str("EGRUP")}  AS EquityGroup,
+  ${str("BTYPE")}  AS PayrollType,
+  ${safe_int("SAMNR")} AS InvoiceListNum,
+
+  ${str("BUDGET_PD")} AS FmBudgetPeriod,
+  ${str("PROPMANO")}  AS MandateOpeningContract,
+
+  -- Keep “*_SIMP_DT” as strings (already simplified)
+  CAST(AUGDT_SIMP_DT AS STRING)  AS AUGDT_SIMP_DT,
+  CAST(BLDAT_SIMP_DT AS STRING)  AS BLDAT_SIMP_DT,
+  CAST(BUDAT_SIMP_DT AS STRING)  AS BUDAT_SIMP_DT,
+  CAST(CPUDT_SIMP_DT AS STRING)  AS CPUDT_SIMP_DT,
+  CAST(DABRZ_SIMP_DT AS STRING)  AS DABRZ_SIMP_DT,
+  CAST(MADAT_SIMP_DT AS STRING)  AS MADAT_SIMP_DT,
+  CAST(UEBGDAT_SIMP_DT AS STRING) AS UEBGDAT_SIMP_DT,
+  CAST(ZFBDT_SIMP_DT AS STRING)  AS ZFBDT_SIMP_DT,
+  CAST(ZOLLD_SIMP_DT AS STRING)  AS ZOLLD_SIMP_DT,
+
+  -- Ingestion metadata
+  CAST(SOURCE_FILE_NAME AS STRING) AS SOURCE_FILE_NAME,
+  ${safe_sas_datetime("SAS_IMPORT_DATETIME")} AS SAS_IMPORT_DATETIME
+
+FROM src

@@ -1,0 +1,201 @@
+config {
+  type: "table",
+  schema: "staging",
+  name: "lfa1_staging",
+  tags: ["sap","lfa1","staging"]
+}
+
+js {
+  const {
+    safe_date,
+    safe_sas_datetime,
+    safe_int,
+    str
+  } = require("../includes/macros.js");
+}
+
+WITH src AS (
+  SELECT * FROM ${ref("lnd_lfa1")}
+)
+SELECT
+  CAST(MANDT AS STRING) AS Client,
+  CAST(LIFNR AS STRING) AS AcctNumOfVendor,
+  CAST(LAND1 AS STRING) AS CountryKey,
+  CAST(NAME1 AS STRING) AS Name1_NAME1,
+  CAST(NAME2 AS STRING) AS Name2_NAME2,
+  CAST(NAME3 AS STRING) AS Name3_NAME3,
+  CAST(NAME4 AS STRING) AS Name4,
+  CAST(ORT01 AS STRING) AS City,
+  CAST(ORT02 AS STRING) AS District,
+  CAST(PFACH AS STRING) AS PoBox,
+  CAST(PSTL2 AS STRING) AS POBoxPostalCode,
+  CAST(PSTLZ AS STRING) AS PostalCode,
+  CAST(REGIO AS STRING) AS RegionStateProvinceCounty,
+  CAST(SORTL AS STRING) AS SortField,
+  CAST(STRAS AS STRING) AS HouseNumAndStreet,
+  CAST(ADRNR AS STRING) AS Address,
+
+  CAST(MCOD1 AS STRING) AS SearchTermForMatchcodeSearch_MCOD1,
+  CAST(MCOD2 AS STRING) AS SearchTermForMatchcodeSearch_MCOD2,
+  CAST(MCOD3 AS STRING) AS SearchTermForMatchcodeSearch_MCOD3,
+
+  CAST(ANRED AS STRING) AS Title_ANRED,
+  CAST(BAHNS AS STRING) AS TrainStation,
+
+  COALESCE(SAFE_CAST(BBBNR AS INT64),0) AS InternationalLocationNumPart1,
+  COALESCE(SAFE_CAST(BBSNR AS INT64),0) AS InternationalLocationNumPart2,
+
+  CAST(BEGRU AS STRING) AS AuthorizationGroup,
+  CAST(BRSCH AS STRING) AS IndustryKey,
+  COALESCE(SAFE_CAST(BUBKZ AS INT64),0) AS CheckDigitForTheInternationalLocationNum,
+
+  CAST(DATLT AS STRING) AS DataCommunicationLineNo,
+  CAST(DTAMS AS STRING) AS IndForDataMediumExch,
+  CAST(DTAWS AS STRING) AS InstructionKeyForDataMediumExch,
+
+  ${safe_date("ERDAT")} AS DateOnWhichTheRecordWasCreated,
+  CAST(ERNAM AS STRING) AS NameOfPersonWhoCreatedTheObject,
+  CAST(ESRNR AS STRING) AS IsrSubscriberNum,
+  CAST(KONZS AS STRING) AS GroupKey,
+  CAST(KTOKK AS STRING) AS VendorAcctGroup,
+  CAST(KUNNR AS STRING) AS CustNum,
+  CAST(LNRZA AS STRING) AS AcctNumOfTheAlternativePayee,
+  CAST(LOEVM AS STRING) AS CentralDeletionFlagForMasterRecord,
+  CAST(SPERR AS STRING) AS CentralPostingBlock,
+  CAST(SPERM AS STRING) AS CentrallyImposedPurchBlock,
+  CAST(SPRAS AS STRING) AS LanguageKey,
+
+  CAST(STCD1 AS STRING) AS TaxNum1,
+  CAST(STCD2 AS STRING) AS TaxNum2,
+  CAST(STKZA AS STRING) AS IndBusinessPartnerSubjectToEqualizationTax,
+  CAST(STKZU AS STRING) AS LiableForVat,
+
+  CAST(TELBX AS STRING) AS TeleboxNum,
+  CAST(TELF1 AS STRING) AS FirstTelephoneNum,
+  CAST(TELF2 AS STRING) AS ScndTelephoneNum,
+  CAST(TELFX AS STRING) AS FaxNum,
+  CAST(TELTX AS STRING) AS TeletexNum,
+  CAST(TELX1 AS STRING) AS TelexNum,
+
+  CAST(XCPDK AS STRING) AS IndIsTheAcctAOneTimeAcct,
+  CAST(XZEMP AS STRING) AS IndAlternativePayeeInDocAllowed,
+  CAST(VBUND AS STRING) AS CompanyIdOfTradingPartner,
+  CAST(FISKN AS STRING) AS AcctNumOfTheMasterRecordWithFiscAddress,
+  CAST(STCEG AS STRING) AS VatRegistrationNum,
+  CAST(STKZN AS STRING) AS NaturalPerson,
+  CAST(SPERQ AS STRING) AS FunctionThatWillBeBlocked,
+
+  CAST(GBORT AS STRING) AS PlaceOfBirthOfThePersonSubjectToWhTax,
+  ${safe_date("GBDAT")} AS DateOfBirthOfThePersonSubjectToWhTax,
+  CAST(SEXKZ AS STRING) AS KeyForTheSexOfThePersonSubjectToWhTax,
+
+  CAST(KRAUS AS STRING) AS CreditInformationNum,
+  ${safe_date("REVDB")} AS LastReviewExternal,
+  CAST(QSSYS AS STRING) AS VendorsQmSystem,
+  CAST(KTOCK AS STRING) AS ReferenceAcctGroupForOneTimeAcctVendor,
+
+  CAST(PFORT AS STRING) AS PoBoxCity,
+  CAST(WERKS AS STRING) AS PlantOwnOrExternal,
+  CAST(LTSNA AS STRING) AS IndVendorSubRangeRelevant,
+  CAST(WERKR AS STRING) AS IndPlantLevelRelevant,
+  CAST(PLKAL AS STRING) AS FactoryCalendarKey,
+  CAST(DUEFL AS STRING) AS StatusOfDataTransferIntoSubsequentRelease,
+  CAST(TXJCD AS STRING) AS TaxJurisdiction,
+  CAST(SPERZ AS STRING) AS PayBlock,
+  CAST(SCACD AS STRING) AS StandardCarrierAccessCode,
+  CAST(SFRGR AS STRING) AS ForwardingAgentFreightGroup,
+  CAST(LZONE AS STRING) AS TransportationZoneToOrFromWhichTheGoodsAreDelivered,
+  CAST(XLFZA AS STRING) AS IndAlternativePayeeUsingAcctNum,
+  CAST(DLGRP AS STRING) AS ServiceAgentProcedureGroup,
+
+  CAST(FITYP AS STRING) AS TaxType,
+  CAST(STCDT AS STRING) AS TaxNumType,
+  CAST(REGSS AS STRING) AS RegisteredForSocialInsurance,
+  CAST(ACTSS AS STRING) AS ActivityCodeForSocialInsurance,
+
+  CAST(STCD3 AS STRING) AS TaxNum3,
+  CAST(STCD4 AS STRING) AS TaxNum4,
+  CAST(IPISP AS STRING) AS TaxSplit,
+  COALESCE(SAFE_CAST(TAXBS AS INT64),0) AS TaxBaseInPercentage,
+
+  CAST(PROFS AS STRING) AS Profession,
+  CAST(STGDL AS STRING) AS ShipmentStatisticsGroupTransportationServiceAgent,
+  CAST(EMNFR AS STRING) AS ExternalManufacturerCodeNameOrNum,
+  CAST(LFURL AS STRING) AS UniformResourceLocator,
+
+  CAST(J_1KFREPRE AS STRING) AS NameOfRepresentative,
+  CAST(J_1KFTBUS AS STRING) AS TypeOfBusiness,
+  CAST(J_1KFTIND AS STRING) AS TypeOfIndustry,
+
+  CAST(CONFS AS STRING) AS StatusOfChangeAuthorizationCentral,
+  ${safe_date("UPDAT")} AS DateOnWhichTheChangesWereConfirmed,
+  CAST(UPTIM AS STRING) AS TimeOfLastChangeConfirmation,
+  CAST(NODEL AS STRING) AS CentralDeletionBlockForMasterRecord,
+  ${safe_date("QSSYSDAT")} AS ValidityDateOfCertification,
+  CAST(PODKZB AS STRING) AS VendorIndRelevantForProofOfDelivery,
+
+  CAST(FISKU AS STRING) AS AcctNumOfMasterRecordOfTaxOfficeResponsible,
+  CAST(STENR AS STRING) AS TaxNumAtResponsibleTaxAuthority,
+
+  SAFE_CAST(SUBSTR(CAST(J_SC_CAPITAL AS STRING),1,15) AS NUMERIC) AS CapitalAmt,
+  CAST(J_SC_CURRENCY AS STRING) AS Curr,
+
+  CAST(ALC AS STRING) AS AgencyLocationCode,
+  CAST(PMT_OFFICE AS STRING) AS PayOffice,
+  CAST(PSOFG AS STRING) AS ProcessorGroup,
+  CAST(PSOIS AS STRING) AS SubledgerAcctPreprocessingProcedure,
+  CAST(PSON1 AS STRING) AS Name1_PSON1,
+  CAST(PSON2 AS STRING) AS Name2_PSON2,
+  CAST(PSON3 AS STRING) AS Name3_PSON3,
+  CAST(PSOVN AS STRING) AS FirstName,
+  CAST(PSOTL AS STRING) AS Title_PSOTL,
+  CAST(PSOHS AS STRING) AS HouseNumIsNoLongerUsedFromRelease46B,
+  CAST(PSOST AS STRING) AS StreetNoLongerUsedFromRelease46B,
+
+  CAST(STCD5 AS STRING) AS TaxNum5,
+  CAST(CARRIER_CONF AS STRING) AS CarrierConfirmationIsExpected,
+  CAST(TRANSPORT_CHAIN AS STRING) AS TransportationChain,
+  CAST(STAGING_TIME AS STRING) AS StagingTimeInDays,
+  CAST(SCHEDULING_TYPE AS STRING) AS SchedulingProcedure,
+  CAST(SUBMI_RELEVANT AS STRING) AS CrossDockingRelevantForCollectiveNuming,
+  CAST(MIN_COMP AS STRING) AS MicroCompanyInd,
+  CAST(TERM_LI AS STRING) AS TermsOfLiability,
+  CAST(CRC_NUM AS STRING) AS CrcNum,
+  CAST(CVP_XBLCK AS STRING) AS CVP_XBLCK,
+
+  CAST(RG AS STRING) AS RgNum,
+  CAST(EXP AS STRING) AS IssuedBy,
+  CAST(UF AS STRING) AS State,
+  ${safe_date("RGDATE")} AS RgIssueDate,
+
+  -- Handle literal 'NULL' strings → 0 then int
+  COALESCE(SAFE_CAST(NULLIF(UPPER(CAST(RIC AS STRING)),'NULL') AS INT64),0) AS RicNum,
+
+  CAST(RNE AS STRING) AS ForeignNationalRegistration,
+  ${safe_date("RNEDATE")} AS RneIssueDate,
+  CAST(CNAE AS STRING) AS Cnae,
+
+  COALESCE(SAFE_CAST(NULLIF(UPPER(CAST(LEGALNAT AS STRING)),'NULL') AS INT64),0) AS LegalNature,
+
+  CAST(CRTN AS STRING) AS CrtNum,
+  CAST(ICMSTAXPAY AS STRING) AS IcmsTaxpayer,
+  CAST(INDTYP AS STRING) AS IndustryMainType,
+  CAST(TDT AS STRING) AS TaxDeclarationType,
+  CAST(COMSIZE AS STRING) AS CompanySize,
+  CAST(DECREGPC AS STRING) AS DeclarationRegimenForPisCofins,
+
+  CAST(ZZS_DOB AS STRING) AS ZZS_DOB,
+  CAST(SRC_OWNER AS STRING) AS SRC_OWNER,
+
+  CAST(ERDAT_SIMP_DT AS STRING) AS ERDAT_SIMP_DT,
+  CAST(GBDAT_SIMP_DT AS STRING) AS GBDAT_SIMP_DT,
+  CAST(QSSYSDAT_SIMP_DT AS STRING) AS QSSYSDAT_SIMP_DT,
+  CAST(REVDB_SIMP_DT AS STRING) AS REVDB_SIMP_DT,
+  CAST(RGDATE_SIMP_DT AS STRING) AS RGDATE_SIMP_DT,
+  CAST(RNEDATE_SIMP_DT AS STRING) AS RNEDATE_SIMP_DT,
+  CAST(UPDAT_SIMP_DT AS STRING) AS UPDAT_SIMP_DT,
+  CAST(UPTIM_SIMP_TM AS STRING) AS UPTIM_SIMP_TM,
+
+  CAST(SOURCE_FILE_NAME AS STRING) AS SOURCE_FILE_NAME,
+  ${safe_sas_datetime("SAS_IMPORT_DATETIME")} AS SAS_IMPORT_DATETIME
+FROM src

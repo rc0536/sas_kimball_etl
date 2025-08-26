@@ -1,1 +1,4 @@
 declare { database: "sas-kimbal-phase-0", schema: "landing", name: "lnd_bsak" }
+declare { database: "sas-kimbal-phase-0", schema: "landing", name: "lnd_bsik" }
+declare { database: "sas-kimbal-phase-0", schema: "landing", name: "lnd_bvor" }
+declare { database: "sas-kimbal-phase-0", schema: "landing", name: "lnd_bvor" }

@@ -1,18 +1,19 @@
 config {
   type: "incremental",
   schema: "mart",
-  name: "bsak",
-  tags: ["sap","bsak","mart"],
-  bigquery: { partitionBy: "DATE(PostDate)" }  
+  name: "bvor",
+  tags: ["sap","bvor","mart"],
+  bigquery: { partitionBy: "DATE(SAS_IMPORT_DATETIME)" }
 }
 
 WITH src AS (
   SELECT *
-  FROM ${ref("bsak_staging")}
+  FROM ${ref("bvor_staging")}
   ${when(incremental(), `
     WHERE SAS_IMPORT_DATETIME >
       (SELECT IFNULL(MAX(SAS_IMPORT_DATETIME), DATETIME '1900-01-01 00:00:00')
        FROM ${self()})
   `)}
 )
-SELECT * FROM src
+SELECT *
+FROM src

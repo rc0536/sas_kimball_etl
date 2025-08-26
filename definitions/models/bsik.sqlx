@@ -1,0 +1,10 @@
+config {
+  type: "table",
+  schema: "mart",
+  name: "bsik",
+  tags: ["sap","bsik","mart"]
+}
+
+SELECT *
+FROM ${ref("bsik_staging")}
+
