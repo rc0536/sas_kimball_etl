@@ -18,7 +18,7 @@ js {
 
 -- Mirror of your BSAK pattern: CTE over the landing table, then select with conversions
 WITH src AS (
-  SELECT * FROM `sas-kimbal-phase-0.landing.lnd_bsik`
+  SELECT * FROM ${ref("raw_bsik")} 
 )
 SELECT
   -- Strings / IDs
@@ -275,6 +275,6 @@ SELECT
 
   -- Ingestion metadata
   CAST(SOURCE_FILE_NAME AS STRING) AS SOURCE_FILE_NAME,
-  ${safe_sas_datetime("SAS_IMPORT_DATETIME")} AS SAS_IMPORT_DATETIME
+  ${safe_sas_datetime("SASIMPORTDATE")} AS SAS_IMPORT_DATETIME
 
 FROM src

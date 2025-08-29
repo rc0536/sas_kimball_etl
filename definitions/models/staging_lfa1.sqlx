@@ -15,7 +15,7 @@ js {
 }
 
 WITH src AS (
-  SELECT * FROM ${ref("lnd_lfa1")}
+  SELECT * FROM ${ref("raw_lfa1")}
 )
 SELECT
   CAST(MANDT AS STRING) AS Client,

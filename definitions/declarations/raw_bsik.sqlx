@@ -1,6 +1,6 @@
 config {
   type: "declaration",
   schema: "landing",
-  name: "lnd_lfa1",
+  name: "raw_bsik",
 
 }

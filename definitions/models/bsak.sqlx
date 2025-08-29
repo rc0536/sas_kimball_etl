@@ -3,7 +3,7 @@ config {
   schema: "mart",
   name: "bsak",
   tags: ["sap","bsak","mart"],
-  bigquery: { partitionBy: "DATE(PostDate)" }  
+  bigquery: { partitionBy: "PostDate" }  
 }
 
 WITH src AS (

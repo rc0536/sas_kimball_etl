@@ -7,3 +7,6 @@ WHERE Client IS NULL
    OR CompCode IS NULL
    OR AcctDoc IS NULL
    OR LineNum IS NULL
+-- scientific notation
+-- delimitter 
+-- non readable

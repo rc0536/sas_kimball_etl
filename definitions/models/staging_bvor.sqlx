@@ -14,7 +14,7 @@ js {
 }
 
 WITH src AS (
-  SELECT * FROM `sas-kimbal-phase-0.landing.lnd_bvor`
+  SELECT * FROM ${ref("raw_bvor")} 
 )
 SELECT
   CAST(BVORG AS STRING)  AS NumOfCrossCompCodePostingTran,
