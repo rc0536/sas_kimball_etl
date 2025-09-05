@@ -1,0 +1,11 @@
+config {
+  type: "table",
+  schema: "work",
+  name: "zenBSAK_INV",
+  tags: ["ap","bsak"],
+  bigquery: { partitionBy: "DATE(PostDate)", clusterBy: ["CompCode","ClearDoc"] }
+}
+
+SELECT *
+FROM ${ref("bsak")}
+WHERE PostingKey NOT IN ('25','35','38')

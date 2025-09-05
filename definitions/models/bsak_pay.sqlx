@@ -1,0 +1,27 @@
+config {
+  type: "table",
+  schema: "work",
+  name: "zenBSAK_PAY",
+  tags: ["ap","bsak","work"],
+  bigquery: { clusterBy: ["CompCode","ClearDoc"] }
+}
+
+WITH inv AS (
+  SELECT *
+  FROM ${ref("bsak")}
+  WHERE PostingKey IN ('25','35','38')
+)
+SELECT
+  ClearDoc,
+  CompCode,
+  STRING_AGG(PostingKey, ', ' ORDER BY PostingKey) AS PostingKey,   -- STUFF + XML PATH equivalent
+  ANY_VALUE(DocType) AS DocType,
+  ANY_VALUE(PayMethod) AS PayMethod,
+  SUM(CASE WHEN DebitCreditInd='S' THEN SAFE_CAST(AmtInLocalCurr AS NUMERIC)*-1 ELSE SAFE_CAST(AmtInLocalCurr AS NUMERIC) END) AS AmtInLocalCurr,
+  SUM(CASE WHEN DebitCreditInd='S' THEN SAFE_CAST(AmtInDocCurr AS NUMERIC)*-1   ELSE SAFE_CAST(AmtInDocCurr AS NUMERIC) END)   AS AmtInDocCurr,
+  SUM(CASE WHEN DebitCreditInd='S' THEN SAFE_CAST(CashDiscAmtInLocalCurr AS NUMERIC)*-1 ELSE SAFE_CAST(CashDiscAmtInLocalCurr AS NUMERIC) END) AS CashDiscLocalCurr,
+  SUM(CASE WHEN DebitCreditInd='S' THEN SAFE_CAST(CashDiscAmtInDocCurr   AS NUMERIC)*-1 ELSE SAFE_CAST(CashDiscAmtInDocCurr   AS NUMERIC) END) AS CashDiscDocCurr,
+  COUNT(*) AS PayCnt,
+  MAX(SASREFNBR) AS AutoId
+FROM inv
+GROUP BY ClearDoc, CompCode

@@ -1,7 +1,8 @@
 config {
     type: "table",
     schema: "staging",
-    name: "bsak_staging"
+    name: "bsak_staging",
+    tags: ["ap","bsak","staging"]
 }
 
 js {

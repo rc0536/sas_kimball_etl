@@ -2,7 +2,7 @@ config {
   type: "incremental",
   schema: "mart",
   name: "bsak",
-  tags: ["sap","bsak","mart"],
+  tags: ["ap", "bsak"],
   bigquery: { partitionBy: "PostDate" }  
 }
 

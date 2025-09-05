@@ -2,9 +2,14 @@ config {
   type: "table",
   schema: "mart",
   name: "bsik",
-  tags: ["sap","bsik","mart"]
+  tags: ["ap", "bsik"],
+  bigquery: { partitionBy: "PostDate" }  
 }
 
 SELECT *
 FROM ${ref("bsik_staging")}
-
+${when(incremental(), `
+    WHERE SAS_IMPORT_DATETIME >
+      (SELECT IFNULL(MAX(SAS_IMPORT_DATETIME), DATETIME '1900-01-01 00:00:00')
+       FROM ${self()})
+  `)}

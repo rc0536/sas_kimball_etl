@@ -2,7 +2,7 @@ config {
   type: "table",
   schema: "staging",
   name: "lfa1_staging",
-  tags: ["sap","lfa1","staging"]
+  tags: ["ap","lfa1","staging"]
 }
 
 js {

@@ -2,7 +2,7 @@ config {
   type: "incremental",
   schema: "mart",
   name: "bvor",
-  tags: ["sap","bvor","mart"],
+  tags: ["ap", "bvor"],
   bigquery: { partitionBy: "DATE(SAS_IMPORT_DATETIME)" }
 }
 
