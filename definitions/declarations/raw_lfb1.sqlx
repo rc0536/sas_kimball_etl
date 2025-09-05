@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  schema: "landing",
+  name: "raw_lfb1",
+
+}

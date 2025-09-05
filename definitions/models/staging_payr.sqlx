@@ -1,0 +1,89 @@
+config {
+  type: "table",
+  schema: "staging",
+  name: "payr_staging",
+  tags: ["ap","payr","staging"]
+}
+
+js {
+  const {
+    safe_date,
+    safe_sas_datetime,
+    dec15,
+    safe_int,
+    str,
+    str1
+  } = require("../includes/macros.js");
+}
+
+-- Use the declared raw table as a source
+WITH src AS (
+  SELECT * FROM ${ref("raw_payr")}
+)
+
+SELECT
+  CAST(ZBUKR AS STRING)                 AS PayCompCode,
+  CAST(HBKID AS STRING)                 AS ShortKeyForAHouseBank,
+  CAST(HKTID AS STRING)                 AS IdForAcctDetails,
+  ${str1("RZAWE")}                      AS PayMethod,
+  CAST(CHECT AS STRING)                 AS CheckNum,
+  CAST(CHECF AS STRING)                 AS CheckNumFrom,
+  ${safe_date("LAUFD")}                 AS DateOnWhichTheProgramIsToBeRun,
+  CAST(LAUFI AS STRING)                 AS AdditionalIdentification,
+  CAST(LIFNR AS STRING)                 AS AcctNumOfVendor,
+  CAST(KUNNR AS STRING)                 AS CustNum,
+  CAST(EMPFG AS STRING)                 AS PayeeCode,
+  CAST(UBHKT AS STRING)                 AS GLAcctNumForOurBankAcctBankSubAcct,
+  CAST(VBLNR AS STRING)                 AS DocNumOfThePayDoc,
+  ${safe_int("GJAHR")}                  AS FiscYear_GJAHR,
+  ${safe_date("ZALDT")}                 AS ProbablePayDateCashDisc1Due,
+  CAST(WAERS AS STRING)                 AS CurrKey,
+  ${dec15("RWBTR")}                     AS AmtPaidInThePayCurr,
+  CAST(STRGB AS STRING)                 AS BusinessArea,
+  ${safe_date("PRIDT")}                 AS PrintDate,
+  CAST(PRITI AS STRING)                 AS PrintTime,
+  CAST(PRIUS AS STRING)                 AS PrintUser,
+  ${str1("XMANU")}                      AS XManualCheck,
+  ${str1("XBANC")}                      AS XPaidCheck,
+  ${safe_date("BANCD")}                 AS CheckEncashmentDate,
+  ${safe_date("EXTRD")}                 AS DateOfExtractCreation,
+  CAST(EXTRT AS STRING)                 AS TimeOfExtractCreation,
+  ${str1("XBUKR")}                      AS XIntercompanyPay,
+  CAST(ZANRE AS STRING)                 AS TitleOfThePayee,
+  CAST(ZNME1 AS STRING)                 AS NameOfThePayee1,
+  CAST(ZNME2 AS STRING)                 AS NameOfThePayee2,
+  CAST(ZNME3 AS STRING)                 AS NameOfThePayee3,
+  CAST(ZNME4 AS STRING)                 AS NameOfThePayee4,
+  CAST(ZPSTL AS STRING)                 AS PostalCodeOfThePayee,
+  CAST(ZORT1 AS STRING)                 AS CityOfThePayee,
+  CAST(ZSTRA AS STRING)                 AS StreetAndHouseNumOfThePayee,
+  CAST(ZPFAC AS STRING)                 AS POBoxOfThePayee,
+  CAST(ZLAND AS STRING)                 AS CountryKey_ZLAND,
+  CAST(ZREGI AS STRING)                 AS RegionalCodeOfThePayee,
+  CAST(ZBNKS AS STRING)                 AS CountryKey_ZBNKS,
+  CAST(ZBNKN AS STRING)                 AS BankAcctNumOfThePayee,
+  CAST(ZBNKL AS STRING)                 AS BankNumOfThePayeesBank,
+  CAST(ZBKON AS STRING)                 AS BankControlKeyOfThePayeesBank,
+  CAST(ZSWIF AS STRING)                 AS SwiftBicForInternationalPays,
+  CAST(ZIBAN AS STRING)                 AS IbanOfThePayee,
+  ${safe_int("VOIDR")}                  AS CheckVoidReasonCode,
+  ${safe_date("VOIDD")}                 AS VoidedCheckDate,
+  CAST(VOIDU AS STRING)                 AS VoidedCheckUser,
+  CAST(CHECV AS STRING)                 AS ReplacementCheckNum,
+  CAST(HBKIV AS STRING)                 AS ReplacementCheckBank,
+  CAST(HKTIV AS STRING)                 AS ReplacementCheckAcct,
+  CAST(ZPST2 AS STRING)                 AS POBoxPostalCodeOfThePayee,
+  ${str1("XRAGL")}                      AS IndClearingWasReversed,
+  ${safe_int("PERNR")}                  AS PersonnelNum,
+  CAST(SEQNR AS STRING)                 AS SequenceNum,
+  CAST(BTZNR AS STRING)                 AS AssignOfTransfers,
+  CAST(REC_BELNR AS STRING)             AS AcctDoc,
+  ${safe_int("REC_GJAHR")}              AS FiscYear_REC_GJAHR,
+  CAST(ZPFOR AS STRING)                 AS CityOfPayeesPoBox,
+  CAST(UZAWE AS STRING)                 AS PayMethodSupplement,
+  ${str1("ICHEC")}                      AS TypeOfPayMediumStoredInPayRegister,
+  ${str1("IREFE")}                      AS InformationAsToWhetherAReferenceToThisPayExists,
+  ${dec15("RWSKT")}                     AS TotalCashDiscForThePmntTransactnInPmntCurr,
+  CAST(SOURCE_FILE_NAME AS STRING)      AS SOURCE_FILE_NAME,
+  ${safe_sas_datetime("SASIMPORTDATE")} AS SAS_IMPORT_DATETIME
+FROM src

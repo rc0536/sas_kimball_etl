@@ -1,0 +1,81 @@
+config {
+  type: "table",
+  schema: "staging",
+  name: "lfm1_staging",
+  tags: ["ap","lfm1","staging"]
+}
+
+js {
+  const {
+    safe_date,
+    safe_sas_datetime,
+    dec15,
+    safe_int,
+    str,
+    str1
+  } = require("../includes/macros.js");
+}
+
+-- Use the declared raw table as a source
+WITH src AS (
+  SELECT * FROM ${ref("raw_lfm1")}
+)
+
+SELECT
+  CAST(LIFNR AS STRING)            AS VendorAcctNum,
+  CAST(EKORG AS STRING)            AS PurchOrganization,
+  ${safe_date("ERDAT")}            AS DateOnWhichRecordWasCreated,
+  CAST(ERNAM AS STRING)            AS NameOfPersonWhoCreatedTheObject,
+  ${str1("SPERM")}                 AS PurchBlockAtPurchOrganizationLevel,
+  ${str1("LOEVM")}                 AS DeleteFlagForVendorAtPurchLevel,
+  ${str1("LFABC")}                 AS AbcInd,
+  CAST(WAERS AS STRING)            AS PurchaseOrderCurr,
+  CAST(VERKF AS STRING)            AS ResponsibleSalespersonAtVendorsOffice,
+  CAST(TELF1 AS STRING)            AS VendorsTelephoneNum,
+  ${dec15("MINBW")}                AS MinimumOrderValue,
+  CAST(ZTERM AS STRING)            AS TermsOfPayKey,
+  CAST(INCO1 AS STRING)            AS IncotermsPart1,
+  CAST(INCO2 AS STRING)            AS IncotermsPart2,
+  ${str1("WEBRE")}                 AS IndGrBasedInvoiceVerification,
+  ${str1("KZABS")}                 AS OrderAcknowledgmentRequirement,
+  CAST(KALSK AS STRING)            AS GroupForCalcSchemaVendor,
+  ${str1("KZAUT")}                 AS AutomaticGenerationOfPurchaseOrderAllowed,
+  ${str1("EXPVZ")}                 AS ModeOfTransportForForeignTrade,
+  CAST(ZOLLA AS STRING)            AS CustomsOfficeOfficeOfExitEntryForForeignTrade,
+  ${str1("MEPRF")}                 AS PriceDeterminationPricingDateControl,
+  CAST(EKGRP AS STRING)            AS PurchGroup,
+  ${str1("XERSY")}                 AS EvaluatedReceiptSettlementErs,
+  CAST(PLIFZ AS STRING)            AS PlannedDeliveryTimeInDays,
+  CAST(MRPPP AS STRING)            AS PlanningCalendar,
+  CAST(LFRHY AS STRING)            AS PlanningCycle,
+  ${str1("LIBES")}                 AS OrderEntryByVendor,
+  CAST(LIPRE AS STRING)            AS PriceMarkingVendor,
+  ${str1("LISER")}                 AS RackJobbingVendor,
+  ${str1("PRFRE")}                 AS IndRelevToPriceDeterminationVendHierarchy,
+  ${str1("NRGEW")}                 AS IndWhetherDiscInKindGranted,
+  ${str1("BOIND")}                 AS IndIndexCompilationForSubseqSettlementActive,
+  ${str1("BLIND")}                 AS IndDocIndexCompilationActiveForPurchaseOrders,
+  ${str1("KZRET")}                 AS IndicatesWhetherVendorIsReturnsVendor,
+  ${str1("SKRIT")}                 AS VendorSortCriterionForMaterials,
+  CAST(BSTAE AS STRING)            AS ConfirmationControlKey,
+  CAST(RDPRF AS STRING)            AS RoundingProfile,
+  CAST(MEGRU AS STRING)            AS UnitOfMeasureGroup,
+  CAST(VENSL AS STRING)            AS VendorServiceLevel,
+  CAST(BOPNR AS STRING)            AS RestrictionProfileForPoBasedLoadBuilding,
+  ${str1("XERSR")}                 AS AutomaticEvaluatedReceiptSettlementForReturnItems,
+  CAST(EIKTO AS STRING)            AS OurAcctNumWithTheVendor,
+  CAST(ABUEB AS STRING)            AS ReleaseCreationProfile,
+  CAST(PAPRF AS STRING)            AS ProfileForTransferringMaterialDataViaIdocProact,
+  ${str1("AGREL")}                 AS IndRelevantForAgencyBusiness,
+  ${str1("XNBWY")}                 AS ReValAllowed,
+  CAST(VSBED AS STRING)            AS ShippingConditions,
+  ${str1("LEBRE")}                 AS IndForServiceBasedInvoiceVerification,
+  ${str1("BOLRE")}                 AS IndVendorSubjectToSubseqSettlementAccting,
+  ${str1("UMSAE")}                 AS ComparisonAgreementOfBusinessVolumesNecessary,
+  ${str1("VENDOR_RMA_REQ")}        AS VendorRmaNumRequired,
+  CAST(ACTIVITY_PROFIL AS STRING)  AS ActivityProfileForPoControlling,
+  CAST(TRANSPORT_CHAIN AS STRING)  AS TransportationChain,
+  CAST(STAGING_TIME AS STRING)     AS StagingTimeInDays,
+  CAST(SOURCE_FILE_NAME AS STRING) AS SOURCE_FILE_NAME,
+  ${safe_sas_datetime("SASIMPORTDATE")} AS SAS_IMPORT_DATETIME
+FROM src

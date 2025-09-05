@@ -24,5 +24,5 @@ SELECT
   CAST(XARCH AS STRING)  AS IndDocAlreadyArchived,
 
   CAST(SOURCE_FILE_NAME AS STRING)                    AS SOURCE_FILE_NAME,
-  ${safe_sas_datetime("SAS_IMPORT_DATETIME")}         AS SAS_IMPORT_DATETIME
+  ${safe_sas_datetime("SASIMPORTDATE")}         AS SAS_IMPORT_DATETIME
 FROM src
